@@ -4,7 +4,7 @@ using Slate.Core.Controls.DataGrid;
 
 namespace Slate.FrontEnd.OpenGl
 {
-    internal class Row
+    public class Row
     {
         public string Property1 { get; }
         public int Property2 { get; private set; }

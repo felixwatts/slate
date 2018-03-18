@@ -11,6 +11,8 @@ namespace Slate.Core
         public Point TopLeft { get; }
         public Point BottomRight { get; }
 
+        public bool IsEmpty  => TopLeft.X == BottomRight.X || TopLeft.Y == BottomRight.Y;
+
         public Region(Point topLeft, Point bottomRight)
         {
             TopLeft = new Point(
@@ -47,11 +49,6 @@ namespace Slate.Core
                  new Point(
                     Math.Min(BottomRight.X, other.BottomRight.X),
                     Math.Min(BottomRight.Y, other.BottomRight.Y)));
-        }
-
-        public bool IsEmpty()
-        {
-            return TopLeft.X == BottomRight.X || TopLeft.Y == BottomRight.Y;
         }
 
         public IEnumerator<Point> GetEnumerator()

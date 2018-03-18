@@ -9,10 +9,9 @@ namespace Slate.Core.Controls.DataGrid
         public static IEnumerable<IColumn<TRow>> FromProperties<TRow>()
         {
             return typeof(TRow)
-                .GetProperties(BindingFlags.Public)
+                .GetProperties()
                 .Select(p => FromProperty<TRow>(p.Name))
                 .ToArray();
-
         }
 
         public static IColumn<TRow> FromProperty<TRow>(string propertyName, uint? color = null)
@@ -20,7 +19,7 @@ namespace Slate.Core.Controls.DataGrid
             var property = typeof(TRow).GetProperty(propertyName);
 
             if(property.PropertyType == typeof(int))
-                return new IntPropertyColumn<TRow>(propertyName, null, false, null, null);
+                return new IntPropertyColumn<TRow>(propertyName);
             else if(property.PropertyType == typeof(string))
                 return new StringPropertyColumn<TRow>(propertyName);
             else return new DefaultPropertyColumn<TRow>(propertyName);

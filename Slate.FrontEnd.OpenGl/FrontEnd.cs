@@ -4,6 +4,7 @@ using Microsoft.Xna.Framework.Input;
 using System.Collections.Concurrent;
 using Slate.Core;
 using System;
+using System.Linq;
 
 namespace Slate.FrontEnd.OpenGl
 {
@@ -14,6 +15,8 @@ namespace Slate.FrontEnd.OpenGl
         private readonly ISlate _slate;
         private ConcurrentQueue<Update> _pendingUpdates;
         private Style _style;
+        private int _numRowsInView;
+        private Cell[] _cellCache;
         private Region _visibleRegion;
 
         public FrontEnd(ISlate slate)
@@ -27,8 +30,6 @@ namespace Slate.FrontEnd.OpenGl
 
         protected override void Initialize()
         {
-            _slate.Updates.Subscribe(u => _pendingUpdates.Enqueue(u));
-
             base.Initialize();
         }
 
@@ -36,9 +37,15 @@ namespace Slate.FrontEnd.OpenGl
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var font = Content.Load<SpriteFont>("FontSmallRegular");
-            var texture = Content.Load<Texture>("oneWhitePixel");
-            _style = new Style(font, texture);
+            var fontRegular = Content.Load<SpriteFont>("FontSmallRegular");
+            var fontBold = Content.Load<SpriteFont>("FontSmallBold");
+            var texture = Content.Load<Texture2D>("oneWhitePixel");
+            _style = new Style(fontRegular, fontBold, texture);
+
+            _slate.Updates.Subscribe(u => _pendingUpdates.Enqueue(u));   
+
+            _numRowsInView = (int) _graphics.GraphicsDevice.Viewport.Height / _style.CellHeight;
+            _cellCache = new Cell[_numRowsInView];
 
             // TODO: use this.Content to load your game content here
         }
@@ -59,35 +66,103 @@ namespace Slate.FrontEnd.OpenGl
 
             _spriteBatch.Begin();
 
-            using(_slate.Lock())
+            int column = 0; int columnStartPx = 0;
+            
+            while(columnStartPx < _graphics.GraphicsDevice.Viewport.Width)
             {
-                foreach(var point in _visibleRegion)
+                using(_slate.Lock())
                 {
-                    var cell = _slate.GetCell(point);
-                    DrawCell(point, cell);
+                    for(int y = 0; y < _numRowsInView; y++)
+                    {
+                        _cellCache[y] = _slate.GetCell(new Slate.Core.Point(column, y));
+                    }
                 }
+
+                var columnWidthPx = _cellCache.Max(MeasureCellWidth);
+                
+                for(int y = 0; y < _numRowsInView; y++)
+                {
+                    var cell = _cellCache[y];
+                    DrawCell(columnStartPx, y * _style.CellHeight, columnWidthPx, cell);
+                }
+
+                column++;
+                columnStartPx += columnWidthPx;
+
+                Console.WriteLine($"{columnWidthPx} {_graphics.GraphicsDevice.Viewport.Width}");
             }
- 
-            _spriteBatch.DrawString(_font, "Hello, World!", new Vector2(100, 100), Microsoft.Xna.Framework.Color.Black);
+
+            _visibleRegion = new Region(Slate.Core.Point.Zero, new Slate.Core.Point(column, _numRowsInView));            
             
             _spriteBatch.End();
 
             base.Draw(gameTime);
         }
 
-        private void DrawCell(Point at, Cell cell)
+        private int MeasureCellWidth(Cell cell)
         {
-            _spriteBatch.Draw(_style.Texture, )
+            if(cell == null) return _style.MinCellWidth;
+            var font = cell.IsTextBold ?_style.FontBold : _style.FontRegular;
+            return (int)(font.MeasureString(cell.Text).X + 2 * _style.CellPaddingX + 1);
+        }    
+
+        private void DrawCell(int xPx, int yPx, int widthPx, Cell cell)
+        {
+            _spriteBatch.Draw(
+                _style.Texture, 
+                new Rectangle(xPx, yPx, widthPx, _style.CellHeight), 
+                _style.GridLines);
+
+            if(cell == null) return;
+
+            _spriteBatch.Draw(
+                _style.Texture, 
+                new Rectangle(xPx + 1, yPx + 1, widthPx - 1, _style.CellHeight - 1), 
+                _style.GetColor(cell.Color));
+
+            if(string.IsNullOrEmpty(cell.Text)) return;
+
+            var font = cell.IsTextBold ? _style.FontBold : _style.FontRegular;
+
+            _spriteBatch.DrawString(
+                font, 
+                cell.Text, 
+                GetTextPosition(xPx, yPx, widthPx, cell.Alignment, cell.Text, font),
+                Microsoft.Xna.Framework.Color.White);
         }
 
-        private Microsoft.Xna.Framework.Rectangle ToScreen(Point cell)
+        private Vector2 GetTextPosition(int xPx, int yPx, int cellWidthPx, TextAlignment alignment, string text, SpriteFont font)
         {
-            return new Microsoft.Xna.Framework.Rectangle(cell.X * _style.CellWi)
+            var y = yPx + 1 + _style.CellPaddingY;
+            var x = 0;
+            switch(alignment)
+            {
+                case TextAlignment.Left:
+                    x = xPx + 1 + _style.CellPaddingX;
+                    break;
+                case TextAlignment.Right:
+                {
+                    var size = font.MeasureString(text);
+                    x = (int)(xPx + cellWidthPx - size.X - _style.CellPaddingX);
+                    break;
+                }
+                case TextAlignment.Center:
+                {
+                    var size = font.MeasureString(text);
+                    x = (int)(xPx + ((cellWidthPx - size.X) / 2));
+                    break;
+                }                
+            }
+
+            return new Vector2(x, y);
         }
 
         private bool IsRedrawRequired()
         {
             bool isRedrawRequired = false;
+
+            if(_visibleRegion == null) return true;
+
             while(_pendingUpdates.TryDequeue(out var update))
             {
                 switch(update.Type)
@@ -101,6 +176,8 @@ namespace Slate.FrontEnd.OpenGl
                         break;
                 }
             }
+
+            return isRedrawRequired;
         }
     }
 }

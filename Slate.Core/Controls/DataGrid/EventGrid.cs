@@ -17,8 +17,15 @@ namespace Slate.Core.Controls.DataGrid
         private readonly IDisposable _disposable;
         private readonly EventCollection _content;
 
+        public override Point Size => new Point(_columns.Length, _content.Length+1);
+
         public EventGrid(IObservable<TEvent> source, IEnumerable<IColumn<TEvent>> columns)
         {
+            if(!columns.Any()) 
+            {
+                throw new Exception();
+            }
+
             _content = new EventCollection();
 
             _columns = columns.Where(c => c.IsFixed).Union(columns.Where(c => !c.IsFixed)).ToArray();
@@ -35,13 +42,15 @@ namespace Slate.Core.Controls.DataGrid
             disposables.Add(source.Subscribe(HandleNewEvent));
 
             _disposable = disposables.ToDisposeAll();
-        }
+        }        
 
         public override Cell GetCell(Point at)
         {
             if (at.X < 0 || at.Y < 0 || at.X >= Size.X || at.Y >= Size.Y) return null;
 
-            var row = _content[at.Y];
+            if(at.Y == 0) return _columns[at.X].GetHeader();
+
+            var row = _content[at.Y-1];
             var column = _columns[at.X];
             var cell = column.GetCell(row);
 
@@ -55,7 +64,7 @@ namespace Slate.Core.Controls.DataGrid
 
         private void HandleRowUpdate(int columnIndex, TEvent row)
         {
-            var rowIndex = _content.IndexOf(row);
+            var rowIndex = _content.IndexOf(row)+1;
             var dirtyRegion = Region.FromCell(new Point(columnIndex, rowIndex));
             updates.OnNext(Update.RegionDirty(dirtyRegion));
         }

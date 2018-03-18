@@ -5,13 +5,15 @@ namespace Slate.Core
     {
         public string Text { get; }
         public uint Color { get; }    
-        TextAlignment Alignment { get; }   
+        public TextAlignment Alignment { get; }  
+        public bool IsTextBold { get; }
 
-        public Cell(string text, uint color, TextAlignment alignment)
+        public Cell(string text, uint color, TextAlignment alignment, bool isTextBold = false)
         {
             Text = text;
             Color = color;
             Alignment = alignment;
+            IsTextBold = isTextBold;
         } 
     }
 }
