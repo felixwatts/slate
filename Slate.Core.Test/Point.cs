@@ -73,5 +73,65 @@ namespace Slate.Core.Test
             Assert.AreEqual(expectedX, actual.X);
             Assert.AreEqual(expectedY, actual.Y);
         }
+
+        [Test]
+        public void Equality()
+        {
+            Point left = null, right = null;
+
+            // self equality
+            Assert.IsTrue(left == left);
+            left = Point.Zero;
+            Assert.IsTrue(left == left);
+            Assert.IsTrue(left.Equals(left));
+            left = new Point(long.MaxValue, long.MaxValue);
+            Assert.IsTrue(left == left);
+            Assert.IsTrue(left.Equals(left));
+
+            // null equality
+            left = null; right = null;
+            Assert.IsFalse(left == right);
+            Assert.IsFalse(right == left);
+
+            // null/non null inequality
+            left = Point.Zero; right = null;
+            Assert.IsFalse(left == right);
+            Assert.IsFalse(right == left);
+            Assert.IsFalse(left.Equals(right));
+
+            // same object equality
+            left = Point.Zero; right = Point.Zero;
+            Assert.IsTrue(left == right);
+            Assert.IsTrue(right == left);
+            Assert.IsTrue(left.Equals(right));
+            Assert.IsTrue(right.Equals(left));
+
+            // same value equality
+            left = Point.Zero; right = new Point(0, 0);
+            Assert.IsTrue(left == right);
+            Assert.IsTrue(right == left);
+            Assert.IsTrue(left.Equals(right));
+
+            left = new Point(42, 42); right = new Point(42, 42);
+            Assert.IsTrue(left == right);
+            Assert.IsTrue(right == left);
+            Assert.IsTrue(left.Equals(right));
+
+            left = new Point(long.MaxValue, long.MaxValue); right = new Point(long.MaxValue, long.MaxValue);
+            Assert.IsTrue(left == right);
+            Assert.IsTrue(right == left);
+            Assert.IsTrue(left.Equals(right));
+
+            // different value inequality
+            left = new Point(1, 0); right = new Point(0, 0);
+            Assert.IsFalse(left == right);
+            Assert.IsFalse(right == left);
+            Assert.IsFalse(left.Equals(right));
+
+            left = new Point(1, 0); right = new Point(0, 1);
+            Assert.IsFalse(left == right);
+            Assert.IsFalse(right == left);
+            Assert.IsFalse(left.Equals(right));
+        }
     }
 }

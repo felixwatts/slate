@@ -4,10 +4,12 @@ namespace Slate.Core
 {
     public class Point : IEquatable<Point>
     {
-        public long X { get; }
-        public long Y { get; }
+        public int X { get; }
+        public int Y { get; }
 
-        public Point(long x, long y)
+        public static Point Zero { get; } = new Point(0, 0);
+
+        public Point(int x, int y)
         {
             X = x;
             Y = y;
@@ -28,9 +30,26 @@ namespace Slate.Core
             return new Point(-point.X, -point.Y);
         }
 
+        public static bool operator ==(Point left, Point right)
+        {
+            if((object)left == null) return (object)right == null;
+            return left.Equals(right);
+        }
+
+        public static bool operator !=(Point left, Point right)
+        {
+            return !(left == right);
+        }
+
+        public override bool Equals(object obj)
+        {
+            return Equals(obj as Point);
+        }
+
         public bool Equals(Point other)
         {
-            throw new NotImplementedException();
+            if((object)other == null) return false;
+            return X == other.X && Y == other.Y;
         }
 
         public override int GetHashCode()
