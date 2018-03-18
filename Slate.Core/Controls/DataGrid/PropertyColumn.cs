@@ -11,14 +11,19 @@ namespace Slate.Core.Controls.DataGrid
         protected readonly PropertyInfo _property;
         private readonly Subject<TRow> _updates;
         private readonly Cell _header;
-        private readonly uint _color;
-        private readonly TextAlignment _alignment;
+        protected readonly uint _color;
+        protected readonly TextAlignment _alignment;
 
-        protected PropertyColumn(string propertyName, string header, bool isFixed, uint color, TextAlignment alignment)
+        protected PropertyColumn(
+            string propertyName, 
+            string header, 
+            bool isFixed, 
+            uint color, 
+            TextAlignment alignment)
         {
             _property = typeof(TRow).GetProperty(propertyName);
             _updates = new Subject<TRow>();
-            _header = new Cell(header.ToUpper(), Color.Black, TextAlignment.Center);
+            _header = new Cell((header ?? _property.Name).ToUpper(), Color.Black, TextAlignment.Center);
             _color = color;
             _alignment = alignment;
             IsFixed = isFixed;
@@ -55,5 +60,10 @@ namespace Slate.Core.Controls.DataGrid
 
         protected abstract string ValueToString(object val);
         protected abstract bool TryParseValue(string str, out object val);
+
+        protected T Get<T>(TRow row)
+        {
+            return (T)_property.GetValue(row);
+        }
     }
 }

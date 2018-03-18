@@ -23,7 +23,7 @@ namespace Slate.Core.Test
         [TestCase(0, 1, 0, -1, 0, 0)]
         [TestCase(0, -1, 0, 1, 0, 0)]
         [TestCase(0, -1, 0, -1, 0, -2)]
-        public void Add(long xLeft, long yLeft, long xRight, long yRight, long expectedX, long expectedY)
+        public void Add(int xLeft, int yLeft, int xRight, int yRight, int expectedX, int expectedY)
         {
             var left = new Point(xLeft, yLeft);
             var right = new Point(xRight, yRight);
@@ -48,7 +48,7 @@ namespace Slate.Core.Test
         [TestCase(0, 1, 0, -1, 0, 2)]
         [TestCase(0, -1, 0, 1, 0, -2)]
         [TestCase(0, -1, 0, -1, 0, 0)]
-        public void Subtract(long xLeft, long yLeft, long xRight, long yRight, long expectedX, long expectedY)
+        public void Subtract(int xLeft, int yLeft, int xRight, int yRight, int expectedX, int expectedY)
         {
             var left = new Point(xLeft, yLeft);
             var right = new Point(xRight, yRight);
@@ -64,7 +64,7 @@ namespace Slate.Core.Test
         [TestCase(0, 1, 0, -1)]
         [TestCase(1, 1, -1, -1)]
         [TestCase(-1, -1, 1, 1)]
-        public void Negate(long x, long y, long expectedX, long expectedY)
+        public void Negate(int x, int y, long expectedX, long expectedY)
         {
             var point = new Point(x, y);
 
@@ -84,7 +84,7 @@ namespace Slate.Core.Test
             left = Point.Zero;
             Assert.IsTrue(left == left);
             Assert.IsTrue(left.Equals(left));
-            left = new Point(long.MaxValue, long.MaxValue);
+            left = new Point(int.MaxValue, int.MaxValue);
             Assert.IsTrue(left == left);
             Assert.IsTrue(left.Equals(left));
 
@@ -117,7 +117,7 @@ namespace Slate.Core.Test
             Assert.IsTrue(right == left);
             Assert.IsTrue(left.Equals(right));
 
-            left = new Point(long.MaxValue, long.MaxValue); right = new Point(long.MaxValue, long.MaxValue);
+            left = new Point(int.MaxValue, int.MaxValue); right = new Point(int.MaxValue, int.MaxValue);
             Assert.IsTrue(left == right);
             Assert.IsTrue(right == left);
             Assert.IsTrue(left.Equals(right));

@@ -4,15 +4,15 @@ namespace Slate.Core.Controls.DataGrid
     {
         private string _formatString;
 
-        protected IntPropertyColumn(
-            string propertyName, string header, 
-            bool isFixed, 
-            uint color, 
-            TextAlignment alignment,
-            string formatString) 
-            : base(propertyName, header, isFixed, color, alignment)
+        public IntPropertyColumn(
+            string propertyName, 
+            string header = null, 
+            bool isFixed = false, 
+            uint? color = null, 
+            string formatString = null) 
+            : base(propertyName, header, isFixed, color ?? Color.White, TextAlignment.Right)
         {
-            _formatString = formatString;
+            _formatString = formatString ?? "G";
         }
 
         public override bool CanSort => true;
