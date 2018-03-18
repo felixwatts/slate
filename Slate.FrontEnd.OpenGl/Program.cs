@@ -8,6 +8,7 @@ namespace Slate.FrontEnd.OpenGl
     {
         public string Property1 { get; }
         public int Property2 { get; private set; }
+        public bool Property3 => Property2 % 2 == 0;
 
         public Row(long n)
         {
@@ -26,7 +27,7 @@ namespace Slate.FrontEnd.OpenGl
         [STAThread]
         static void Main()
         {
-            var testSource = Observable.Interval(TimeSpan.FromMilliseconds(1000)).Select(t => new Row(t));
+            var testSource = Observable.Interval(TimeSpan.FromMilliseconds(1)).Select(t => new Row(t));
 
             var testSlate = new EventGrid<Row>(testSource, ColumnFactory.FromProperties<Row>());
 

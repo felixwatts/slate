@@ -22,6 +22,8 @@ namespace Slate.Core.Controls.DataGrid
                 return new IntPropertyColumn<TRow>(propertyName);
             else if(property.PropertyType == typeof(string))
                 return new StringPropertyColumn<TRow>(propertyName);
+            else if (property.PropertyType == typeof(bool))
+                return new BoolPropertyColumn<TRow>(propertyName);
             else return new DefaultPropertyColumn<TRow>(propertyName);
 
         }

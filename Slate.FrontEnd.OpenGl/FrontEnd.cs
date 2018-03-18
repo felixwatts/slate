@@ -87,9 +87,7 @@ namespace Slate.FrontEnd.OpenGl
                 }
 
                 column++;
-                columnStartPx += columnWidthPx;
-
-                Console.WriteLine($"{columnWidthPx} {_graphics.GraphicsDevice.Viewport.Width}");
+                columnStartPx += columnWidthPx;                
             }
 
             _visibleRegion = new Region(Slate.Core.Point.Zero, new Slate.Core.Point(column, _numRowsInView));            
@@ -123,12 +121,13 @@ namespace Slate.FrontEnd.OpenGl
             if(string.IsNullOrEmpty(cell.Text)) return;
 
             var font = cell.IsTextBold ? _style.FontBold : _style.FontRegular;
+            var textColor = Slate.Core.Color.ContrastingColor(cell.Color);
 
             _spriteBatch.DrawString(
                 font, 
                 cell.Text, 
                 GetTextPosition(xPx, yPx, widthPx, cell.Alignment, cell.Text, font),
-                Microsoft.Xna.Framework.Color.White);
+                _style.GetColor(textColor));
         }
 
         private Vector2 GetTextPosition(int xPx, int yPx, int cellWidthPx, TextAlignment alignment, string text, SpriteFont font)

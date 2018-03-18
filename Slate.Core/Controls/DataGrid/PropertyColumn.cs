@@ -23,7 +23,7 @@ namespace Slate.Core.Controls.DataGrid
         {
             _property = typeof(TRow).GetProperty(propertyName);
             _updates = new Subject<TRow>();
-            _header = new Cell((header ?? _property.Name).ToUpper(), Color.Black, TextAlignment.Center);
+            _header = new Cell((header ?? _property.Name).ToUpper(), Color.Black, TextAlignment.Center, true);
             _color = color;
             _alignment = alignment;
             IsFixed = isFixed;

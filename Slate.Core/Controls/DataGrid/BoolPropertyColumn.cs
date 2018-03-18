@@ -2,12 +2,12 @@ namespace Slate.Core.Controls.DataGrid
 {
     public class BoolPropertyColumn<TRow> : PropertyColumn<TRow>
     {
-        protected BoolPropertyColumn(
+        public BoolPropertyColumn(
             string propertyName, 
-            string header, 
-            bool isFixed, 
-            uint color) 
-            : base(propertyName, header, isFixed, color, TextAlignment.Center)
+            string header = null, 
+            bool isFixed = false, 
+            uint? color = null) 
+            : base(propertyName, header, isFixed, color ?? Color.White, TextAlignment.Center)
         {
         }
 
