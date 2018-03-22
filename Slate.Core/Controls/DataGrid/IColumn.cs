@@ -15,6 +15,9 @@ namespace Slate.Core.Controls.DataGrid
 
         void UserInput(IEnumerable<TRow> rows, string input);
 
+        void RegisterRow(TRow row);
+        void UnregisterRow(TRow row);
+
         IObservable<TRow> Updates { get; }
     }
 }

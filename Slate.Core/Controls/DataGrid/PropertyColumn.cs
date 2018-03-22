@@ -1,5 +1,6 @@
 using System;
 using System.Collections.Generic;
+using System.ComponentModel;
 using System.Reactive.Subjects;
 using System.Reflection;
 
@@ -8,6 +9,8 @@ namespace Slate.Core.Controls.DataGrid
 
     public abstract class PropertyColumn<TRow> : IColumn<TRow>
     {
+        private bool isTRowINotifyPropertyChanged;
+
         protected readonly PropertyInfo _property;
         private readonly Subject<TRow> _updates;
         private readonly Cell _header;
@@ -23,10 +26,11 @@ namespace Slate.Core.Controls.DataGrid
         {
             _property = typeof(TRow).GetProperty(propertyName);
             _updates = new Subject<TRow>();
-            _header = new Cell((header ?? _property.Name).ToUpper(), Color.Black, TextAlignment.Center, true);
+            _header = new Cell($"{(header ?? _property.Name).ToUpper()} ▲▼", Color.Black, TextAlignment.Center, true);
             _color = color;
             _alignment = alignment;
             IsFixed = isFixed;
+            isTRowINotifyPropertyChanged = typeof(INotifyPropertyChanged).IsAssignableFrom(typeof(TRow));
         }
 
         public bool IsFixed { get; }
@@ -64,6 +68,24 @@ namespace Slate.Core.Controls.DataGrid
         protected T Get<T>(TRow row)
         {
             return (T)_property.GetValue(row);
+        }
+
+        public void RegisterRow(TRow row)
+        {
+            if(isTRowINotifyPropertyChanged)
+                (row as INotifyPropertyChanged).PropertyChanged += HandleRowPropertyChanged;
+        }
+
+        public void UnregisterRow(TRow row)
+        {
+            if(isTRowINotifyPropertyChanged)
+                (row as INotifyPropertyChanged).PropertyChanged -= HandleRowPropertyChanged;
+        }
+
+        private void HandleRowPropertyChanged(object sender, PropertyChangedEventArgs e)
+        {
+            if(e.PropertyName != _property.Name) return;
+            _updates.OnNext((TRow)sender);
         }
     }
 }

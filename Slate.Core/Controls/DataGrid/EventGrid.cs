@@ -77,6 +77,9 @@ namespace Slate.Core.Controls.DataGrid
                 Size = new Point(_columns.Length, _content.Length);                
             }
 
+            foreach(var column in _columns)
+                column.RegisterRow(item);
+
             updates.OnNext(Update.BeginBulkUpdate);
             updates.OnNext(Update.SizeChanged);
             updates.OnNext(Update.ScrollableSizeChanged);

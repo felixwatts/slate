@@ -5,6 +5,8 @@ using System.Collections.Concurrent;
 using Slate.Core;
 using System;
 using System.Linq;
+using MonoGame.Extended;
+using MonoGame.Extended.BitmapFonts;
 
 namespace Slate.FrontEnd.OpenGl
 {
@@ -37,8 +39,8 @@ namespace Slate.FrontEnd.OpenGl
         {
             _spriteBatch = new SpriteBatch(GraphicsDevice);
 
-            var fontRegular = Content.Load<SpriteFont>("FontSmallRegular");
-            var fontBold = Content.Load<SpriteFont>("FontSmallBold");
+            var fontRegular = Content.Load<BitmapFont>("verdana-13px");
+            var fontBold = Content.Load<BitmapFont>("verdana-13px-bold");
             var texture = Content.Load<Texture2D>("oneWhitePixel");
             _style = new Style(fontRegular, fontBold, texture);
 
@@ -101,7 +103,7 @@ namespace Slate.FrontEnd.OpenGl
         {
             if(cell == null) return _style.MinCellWidth;
             var font = cell.IsTextBold ?_style.FontBold : _style.FontRegular;
-            return (int)(font.MeasureString(cell.Text).X + 2 * _style.CellPaddingX + 1);
+            return (int)(font.MeasureString(cell.Text).Width + 2 * _style.CellPaddingX + 1);
         }    
 
         private void DrawCell(int xPx, int yPx, int widthPx, Cell cell)
@@ -130,7 +132,7 @@ namespace Slate.FrontEnd.OpenGl
                 _style.GetColor(textColor));
         }
 
-        private Vector2 GetTextPosition(int xPx, int yPx, int cellWidthPx, TextAlignment alignment, string text, SpriteFont font)
+        private Vector2 GetTextPosition(int xPx, int yPx, int cellWidthPx, TextAlignment alignment, string text, BitmapFont font)
         {
             var y = yPx + 1 + _style.CellPaddingY;
             var x = 0;
@@ -142,13 +144,13 @@ namespace Slate.FrontEnd.OpenGl
                 case TextAlignment.Right:
                 {
                     var size = font.MeasureString(text);
-                    x = (int)(xPx + cellWidthPx - size.X - _style.CellPaddingX);
+                    x = (int)(xPx + cellWidthPx - size.Width - _style.CellPaddingX);
                     break;
                 }
                 case TextAlignment.Center:
                 {
                     var size = font.MeasureString(text);
-                    x = (int)(xPx + ((cellWidthPx - size.X) / 2));
+                    x = (int)(xPx + ((cellWidthPx - size.Width) / 2));
                     break;
                 }                
             }

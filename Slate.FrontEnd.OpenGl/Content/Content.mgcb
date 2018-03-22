@@ -10,22 +10,9 @@
 
 #-------------------------------- References --------------------------------#
 
+/reference:../../packages/monogame.extended.content.pipeline/1.0.617/tools/MonoGame.Extended.Content.Pipeline.dll
 
 #---------------------------------- Content ---------------------------------#
-
-#begin FontSmallBold.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Color
-/build:FontSmallBold.spritefont
-
-#begin FontSmallRegular.spritefont
-/importer:FontDescriptionImporter
-/processor:FontDescriptionProcessor
-/processorParam:PremultiplyAlpha=True
-/processorParam:TextureFormat=Compressed
-/build:FontSmallRegular.spritefont
 
 #begin oneWhitePixel.png
 /importer:TextureImporter
@@ -38,4 +25,38 @@
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
 /build:oneWhitePixel.png
+
+#begin verdana-13px.fnt
+/importer:BitmapFontImporter
+/processor:BitmapFontProcessor
+/build:verdana-13px.fnt
+
+#begin verdana-13px_0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:verdana-13px_0.png
+
+#begin verdana-13px-bold.fnt
+/importer:BitmapFontImporter
+/processor:BitmapFontProcessor
+/build:verdana-13px-bold.fnt
+
+#begin verdana-13px-bold_0.png
+/importer:TextureImporter
+/processor:TextureProcessor
+/processorParam:ColorKeyColor=255,0,255,255
+/processorParam:ColorKeyEnabled=True
+/processorParam:GenerateMipmaps=False
+/processorParam:PremultiplyAlpha=True
+/processorParam:ResizeToPowerOfTwo=False
+/processorParam:MakeSquare=False
+/processorParam:TextureFormat=Color
+/build:verdana-13px-bold_0.png
 

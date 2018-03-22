@@ -1,12 +1,14 @@
 using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using MonoGame.Extended;
+using MonoGame.Extended.BitmapFonts;
 
 namespace Slate.FrontEnd.OpenGl
 {
     public class Style
     {
-        public SpriteFont FontRegular { get; }
-        public SpriteFont FontBold { get; }
+        public BitmapFont FontRegular { get; }
+        public BitmapFont FontBold { get; }
         public Texture2D Texture { get; }
         
         public int MinCellWidth { get; }
@@ -17,7 +19,7 @@ namespace Slate.FrontEnd.OpenGl
         public int CellTextYOffset { get; }
         public Microsoft.Xna.Framework.Color GridLines { get; }
 
-        public Style(SpriteFont fontRegular, SpriteFont fontBold, Texture2D texture)
+        public Style(BitmapFont fontRegular, BitmapFont fontBold, Texture2D texture)
         {
             FontRegular = fontRegular;
             FontBold = fontBold;
@@ -26,9 +28,9 @@ namespace Slate.FrontEnd.OpenGl
             CellPaddingX = 1;
             CellPaddingY = 1;            
 
-            CellHeight = (int)(FontBold.MeasureString("A").Y + (2 * CellPaddingY) + 1);
-            MinCellWidth = (int)FontBold.MeasureString(new string('A', 1)).X;
-            MaxCellWidth = (int)FontBold.MeasureString(new string('A', 100)).X;
+            CellHeight = (int)(FontBold.MeasureString("A").Height + (2 * CellPaddingY) + 1);
+            MinCellWidth = (int)FontBold.MeasureString(new string('A', 1)).Width;
+            MaxCellWidth = (int)FontBold.MeasureString(new string('A', 100)).Width;
 
             GridLines = new Microsoft.Xna.Framework.Color(37, 37, 38, 255);
         }
