@@ -15,6 +15,13 @@ namespace Slate.Core
         #region Write Access - if called from UI thread, should be called within a using(Lock()){ ... }
 
         void SetScrollOffset(Point offset);
+        void SetVisibleRegions(Region[] visibleRegions);
+
+        void KeyDown(Key key, ModifierKeys modifierKeys);
+        void KeyUp(Key key, ModifierKeys modifierKeys);
+        void MouseDown(Point cell, MouseButton button, ModifierKeys modifierKeys);
+        void MouseUp(Point cell, MouseButton button, ModifierKeys modifierKeys);        
+        void MouseMove(Point cell, ModifierKeys modifierKeys);
 
         #endregion
 

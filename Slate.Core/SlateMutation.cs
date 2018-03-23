@@ -37,6 +37,11 @@ namespace Slate.Core
             _source.SetScrollOffset(offset);
         }
 
+        public virtual void SetVisibleRegions(Region[] visibleRegions)
+        {
+            _source.SetVisibleRegions(visibleRegions);
+        }
+
         public void Dispose()
         {
             _disposable.Dispose();
@@ -45,6 +50,31 @@ namespace Slate.Core
         protected virtual void HandleUpdate(Update update)
         {
             _updates.OnNext(update);
+        }
+
+        public virtual void KeyDown(Key key, ModifierKeys modifierKeys)
+        {
+            _source.KeyDown(key, modifierKeys);
+        }
+
+        public virtual void KeyUp(Key key, ModifierKeys modifierKeys)
+        {
+            _source.KeyUp(key, modifierKeys);
+        }
+
+        public virtual void MouseDown(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            _source.MouseDown(cell, button, modifierKeys);
+        }
+
+        public virtual void MouseUp(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            _source.MouseUp(cell, button, modifierKeys);
+        }
+
+        public virtual void MouseMove(Point cell, ModifierKeys modifierKeys)
+        {
+            _source.MouseMove(cell, modifierKeys);
         }
     }
 }

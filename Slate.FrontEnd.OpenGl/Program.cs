@@ -53,10 +53,17 @@ namespace Slate.FrontEnd.OpenGl
             var testSource = new Subject<Row>();
             Task.Factory.StartNew(() =>
             {
-                for(var n = 0;; n++)
+                try
                 {
-                    testSource.OnNext(new Row(n));
-                    Thread.Sleep(1000);
+                    for(var n = 0;; n++)
+                    {
+                        testSource.OnNext(new Row(n));
+                        Thread.Sleep(1000);
+                    }
+                }
+                catch(Exception ex)
+                {
+                    Console.WriteLine(ex);
                 }
             });
 

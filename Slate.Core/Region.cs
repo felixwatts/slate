@@ -4,7 +4,7 @@ using System.Collections.Generic;
 
 namespace Slate.Core
 {
-    public class Region : IEnumerable<Point>
+    public class Region : IEnumerable<Point>, IEquatable<Region>
     {
         public static Region Empty { get; } = new Region(Point.Zero, Point.Zero);
 
@@ -65,6 +65,17 @@ namespace Slate.Core
         IEnumerator IEnumerable.GetEnumerator()
         {
             return (this as IEnumerable<Point>).GetEnumerator();
+        }
+
+        public bool Equals(Region other)
+        {
+            if(other == null) return false;
+            return TopLeft.Equals(other.TopLeft) && BottomRight.Equals(other.BottomRight);
+        }
+
+        public override string ToString()
+        {
+            return $"{TopLeft}->{BottomRight}";
         }
     }
 }

@@ -13,11 +13,16 @@ namespace Slate.Core.Controls.DataGrid
     /// </summary>  
     public class EventGrid<TEvent> : SlateBase, IDisposable
     {
+        const int Y_HEADER = 0;
+        const int Y_DATA = 1;
+
         private readonly IColumn<TEvent>[] _columns;
         private readonly IDisposable _disposable;
         private readonly EventCollection _content;
+        
+        private Region[] _visibleRegions;
 
-        public override Point Size => new Point(_columns.Length, _content.Length+1);
+        public override Point Size => new Point(_columns.Length, _content.Length + Y_DATA);
 
         public EventGrid(IObservable<TEvent> source, IEnumerable<IColumn<TEvent>> columns)
         {
@@ -27,8 +32,8 @@ namespace Slate.Core.Controls.DataGrid
             }
 
             _content = new EventCollection();
-
             _columns = columns.Where(c => c.IsFixed).Union(columns.Where(c => !c.IsFixed)).ToArray();
+            _visibleRegions = new Region[0];
 
             var disposables = new List<IDisposable>();
             
@@ -48,13 +53,39 @@ namespace Slate.Core.Controls.DataGrid
         {
             if (at.X < 0 || at.Y < 0 || at.X >= Size.X || at.Y >= Size.Y) return null;
 
-            if(at.Y == 0) return _columns[at.X].GetHeader();
+            if(at.Y == Y_HEADER) return _columns[at.X].GetHeader();
 
-            var row = _content[at.Y-1];
+            var row = _content[at.Y - Y_DATA];
             var column = _columns[at.X];
             var cell = column.GetCell(row);
 
             return cell;
+        }
+
+        public override void SetVisibleRegions(Region[] visibleRegions)
+        {
+            Console.WriteLine($"Set visible regions: {string.Join(", ", visibleRegions.Select(r => r.ToString()))}");
+
+            var newCells = visibleRegions.SelectMany(x => x);
+            var oldCells = _visibleRegions.SelectMany(x => x);
+
+            _visibleRegions = visibleRegions;
+
+            var deactivatedCells = new HashSet<Point>(oldCells);
+            deactivatedCells.ExceptWith(newCells);
+
+            var activatedCells = new HashSet<Point>(newCells);
+            deactivatedCells.ExceptWith(oldCells);
+
+            foreach(var cell in deactivatedCells)
+            {
+                if (cell.X < 0 || cell.Y < 0 || cell.X >= Size.X || cell.Y >= Size.Y) continue;
+
+                var row = _content[cell.Y - Y_DATA];
+                var column = _columns[cell.X];
+
+                column.DeactivateRow(row);
+            }
         }
 
         public void Dispose()
@@ -77,8 +108,23 @@ namespace Slate.Core.Controls.DataGrid
                 Size = new Point(_columns.Length, _content.Length);                
             }
 
-            foreach(var column in _columns)
-                column.RegisterRow(item);
+            foreach(var region in _visibleRegions)
+            {
+                var activatedRowIndex = Math.Max(region.TopLeft.Y-Y_DATA, 0);
+                Console.WriteLine($"Activated row index: {activatedRowIndex}");            
+                var activatedRow = _content[activatedRowIndex];
+                for(var activatedCellX = Math.Max(0, region.TopLeft.X); activatedCellX < Math.Min(_columns.Length, region.BottomRight.X); activatedCellX++)
+                    _columns[activatedCellX].ActivateRow(activatedRow);
+
+                var deactivatedRowIndex = region.BottomRight.Y-Y_DATA;
+                Console.WriteLine($"Deactivated row index: {deactivatedRowIndex}"); 
+                if(deactivatedRowIndex < _content.Length)
+                {                                       
+                    var deactivatedRow = _content[deactivatedRowIndex];
+                    for(var deactivatedCellX = Math.Max(0, region.TopLeft.X); deactivatedCellX < Math.Min(_columns.Length, region.BottomRight.X); deactivatedCellX++)
+                        _columns[deactivatedCellX].DeactivateRow(deactivatedRow);
+                }
+            }
 
             updates.OnNext(Update.BeginBulkUpdate);
             updates.OnNext(Update.SizeChanged);

@@ -70,17 +70,25 @@ namespace Slate.Core.Controls.DataGrid
             return (T)_property.GetValue(row);
         }
 
-        public void RegisterRow(TRow row)
+        public void ActivateRow(TRow row)
         {
+            _numActiveCells++;
+            Console.WriteLine(_numActiveCells);
+
             if(isTRowINotifyPropertyChanged)
                 (row as INotifyPropertyChanged).PropertyChanged += HandleRowPropertyChanged;
         }
 
-        public void UnregisterRow(TRow row)
+        public void DeactivateRow(TRow row)
         {
+            _numActiveCells--;
+            Console.WriteLine(_numActiveCells);
+
             if(isTRowINotifyPropertyChanged)
                 (row as INotifyPropertyChanged).PropertyChanged -= HandleRowPropertyChanged;
         }
+
+        private static int _numActiveCells;
 
         private void HandleRowPropertyChanged(object sender, PropertyChangedEventArgs e)
         {

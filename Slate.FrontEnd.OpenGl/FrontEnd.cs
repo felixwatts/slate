@@ -20,6 +20,7 @@ namespace Slate.FrontEnd.OpenGl
         private int _numRowsInView;
         private Cell[] _cellCache;
         private Region _visibleRegion;
+        private Keys[] _lastPressedKeys = new Keys[0];
 
         public FrontEnd(ISlate slate)
         {
@@ -50,17 +51,51 @@ namespace Slate.FrontEnd.OpenGl
             _cellCache = new Cell[_numRowsInView];
 
             // TODO: use this.Content to load your game content here
-        }
+        }        
 
         protected override void Update(GameTime gameTime)
-        {
-            if (GamePad.GetState(PlayerIndex.One).Buttons.Back == ButtonState.Pressed || Keyboard.GetState().IsKeyDown(Keys.Escape))
-                Exit();
+        {            
+            KeyboardState state = Keyboard.GetState();
+            var currentPressedKeys = state.GetPressedKeys();
+            var keysDown = currentPressedKeys.Except(_lastPressedKeys);
+            var keysUp = _lastPressedKeys.Except(currentPressedKeys);
+            _lastPressedKeys = currentPressedKeys; 
 
-            // TODO: Add your update logic here
+            if(keysUp.Any() || keysDown.Any())
+            {
+                var modiferKeys = GetModifierKeys(state);
 
+                using(_slate.Lock())
+                {
+                    foreach(var key in keysUp)
+                    {
+                        _slate.KeyUp(Translate(key), modiferKeys);
+                    }
+
+                    foreach(var key in keysDown)
+                    {
+                        _slate.KeyDown(Translate(key), modiferKeys);
+                    }
+                }
+            }
+            
             base.Update(gameTime);
         }
+
+        private Slate.Core.Key Translate(Keys key) => (Slate.Core.Key)key; 
+
+        private Slate.Core.ModifierKeys GetModifierKeys(KeyboardState state)
+        {
+            var result = Slate.Core.ModifierKeys.None;
+            if(state.IsKeyDown(Keys.LeftControl) || state.IsKeyDown(Keys.RightControl))
+                result |= Slate.Core.ModifierKeys.Ctrl;
+            if(state.IsKeyDown(Keys.LeftShift) || state.IsKeyDown(Keys.RightShift))
+                result |= Slate.Core.ModifierKeys.Shift;
+            if(state.IsKeyDown(Keys.LeftAlt) || state.IsKeyDown(Keys.RightAlt))
+                result |= Slate.Core.ModifierKeys.Alt;
+
+            return result;
+        }       
 
         protected override void Draw(GameTime gameTime)
         {
@@ -92,7 +127,15 @@ namespace Slate.FrontEnd.OpenGl
                 columnStartPx += columnWidthPx;                
             }
 
-            _visibleRegion = new Region(Slate.Core.Point.Zero, new Slate.Core.Point(column, _numRowsInView));            
+            var newVisibleRegion = new Region(Slate.Core.Point.Zero, new Slate.Core.Point(column, _numRowsInView));
+            if(!newVisibleRegion.Equals(_visibleRegion))
+            {
+                _visibleRegion = newVisibleRegion;
+                using(_slate.Lock())
+                {
+                    _slate.SetVisibleRegions(new[]{_visibleRegion});
+                }
+            }                   
             
             _spriteBatch.End();
 

@@ -34,5 +34,35 @@ namespace Slate.Core
         {
             // no op
         }
+
+        public virtual void SetVisibleRegions(Region[] visibleRegions)
+        {
+            // no op
+        }
+
+        public virtual void KeyDown(Key key, ModifierKeys modifierKeys)
+        {
+            // no op
+        }
+
+        public virtual void KeyUp(Key key, ModifierKeys modifierKeys)
+        {
+            // no op
+        }
+
+        public virtual void MouseDown(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            // no op
+        }
+
+        public virtual void MouseUp(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            // no op
+        }
+
+        public virtual void MouseMove(Point cell, ModifierKeys modifierKeys)
+        {   
+            // no op         
+        }
     }
 }
