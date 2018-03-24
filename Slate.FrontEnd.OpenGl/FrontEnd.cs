@@ -7,6 +7,7 @@ using System;
 using System.Linq;
 using MonoGame.Extended;
 using MonoGame.Extended.BitmapFonts;
+using System.Collections.Generic;
 
 namespace Slate.FrontEnd.OpenGl
 {
@@ -21,6 +22,8 @@ namespace Slate.FrontEnd.OpenGl
         private Cell[] _cellCache;
         private Region _visibleRegion;
         private Keys[] _lastPressedKeys = new Keys[0];
+        private Slate.Core.MouseButton[] _lastPressedMouseButtons = new Slate.Core.MouseButton[0];
+        private int[] _columnStartPx;
 
         public FrontEnd(ISlate slate)
         {
@@ -50,11 +53,54 @@ namespace Slate.FrontEnd.OpenGl
             _numRowsInView = (int) _graphics.GraphicsDevice.Viewport.Height / _style.CellHeight;
             _cellCache = new Cell[_numRowsInView];
 
-            // TODO: use this.Content to load your game content here
+            var maxNumColsInView = (int) _graphics.GraphicsDevice.Viewport.Width / _style.MinCellWidth;
+            _columnStartPx = new int[maxNumColsInView];
         }        
 
         protected override void Update(GameTime gameTime)
         {            
+            ProcessKeyboard();
+            ProcessMouse();
+            
+            base.Update(gameTime);
+        }        
+
+        private void ProcessMouse()
+        {
+            var state = Mouse.GetState();
+
+            var currentPressedMouseButtons = new List<Slate.Core.MouseButton>(3);
+            if(state.LeftButton == ButtonState.Pressed) currentPressedMouseButtons.Add(Slate.Core.MouseButton.Left);
+            if(state.MiddleButton == ButtonState.Pressed) currentPressedMouseButtons.Add(Slate.Core.MouseButton.Middle);
+            if(state.RightButton == ButtonState.Pressed) currentPressedMouseButtons.Add(Slate.Core.MouseButton.Right);
+
+            var downButtons = currentPressedMouseButtons.Except(_lastPressedMouseButtons);
+            var upButtons = _lastPressedMouseButtons.Except(currentPressedMouseButtons);
+
+            if(!(upButtons.Any() || downButtons.Any()))
+                return;
+
+            var cell = ToCell(state.Position);
+            var modifierKeys = GetModifierKeys(Keyboard.GetState());
+
+            using(_slate.Lock())
+            {
+                foreach(var button in upButtons)
+                {
+                    _slate.MouseUp(cell, button, modifierKeys);
+                }
+
+                foreach(var button in downButtons)
+                {
+                    _slate.MouseDown(cell, button, modifierKeys);
+                }
+            }
+
+            _lastPressedMouseButtons = currentPressedMouseButtons.ToArray();;
+        }
+
+        private void ProcessKeyboard()
+        {
             KeyboardState state = Keyboard.GetState();
             var currentPressedKeys = state.GetPressedKeys();
             var keysDown = currentPressedKeys.Except(_lastPressedKeys);
@@ -78,8 +124,20 @@ namespace Slate.FrontEnd.OpenGl
                     }
                 }
             }
-            
-            base.Update(gameTime);
+        }
+
+        private Slate.Core.Point ToCell(Microsoft.Xna.Framework.Point screenPoint)
+        {
+            var x = 0;
+            for(;x < _columnStartPx.Length-1; x++)
+            {
+                if(_columnStartPx[x+1] > screenPoint.X)
+                    break;
+            }
+
+            var y = screenPoint.Y / _style.CellHeight;
+
+            return new Slate.Core.Point(x, y);
         }
 
         private Slate.Core.Key Translate(Keys key) => (Slate.Core.Key)key; 
@@ -107,6 +165,8 @@ namespace Slate.FrontEnd.OpenGl
             
             while(columnStartPx < _graphics.GraphicsDevice.Viewport.Width)
             {
+                _columnStartPx[column] = columnStartPx;
+
                 using(_slate.Lock())
                 {
                     for(int y = 0; y < _numRowsInView; y++)

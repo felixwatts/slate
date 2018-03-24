@@ -29,10 +29,14 @@ namespace Slate.Core.Controls
 
             _updates.OnNext(Update.SizeChanged);
             _updates.OnNext(Update.RegionDirty(Region.FromBottomRight(Size)));       
+
+            RefreshSourceVisibleRegions();
         }
 
         public override void KeyDown(Key key, ModifierKeys modifierKeys)
         {
+            Console.WriteLine(key);
+
             if(modifierKeys.HasFlag(ModifierKeys.Ctrl))
             {
                 switch(key)
@@ -69,22 +73,43 @@ namespace Slate.Core.Controls
             }
 
             base.KeyDown(key, modifierKeys);
-        }        
+        }   
+
+        public override void MouseDown(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            _source.MouseDown(ToSource(cell), button, modifierKeys);
+        }     
+
+        public override void MouseUp(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            _source.MouseUp(ToSource(cell), button, modifierKeys);
+        } 
+
+        private Region[] _sinkVisibleRegions;
 
         public override void SetVisibleRegions(Region[] visibleRegions)
         {
+            _sinkVisibleRegions = visibleRegions;
+            RefreshSourceVisibleRegions();
+        }
+
+        private void RefreshSourceVisibleRegions()
+        {
             if(_numFixedRows == 0 && _numFixedColumns == 0) 
             {
-                base.SetVisibleRegions(visibleRegions);
+                base.SetVisibleRegions(_sinkVisibleRegions);
                 return;
             }
 
-            var fixedBothRegion = new Region(Point.Zero, new Point(_numFixedColumns, _numFixedRows));
-            var fixedColumnRegion = new Region(new Point(0, _numFixedRows + _scrollOffset.Y), new Point(_numFixedColumns, Size.Y));
-            var fixedRowRegion = new Region(new Point(_numFixedColumns + _scrollOffset.X, 0), new Point(Size.X, _numFixedRows));
-            var dataRegion = new Region(new Point(_numFixedColumns + _scrollOffset.X, _numFixedRows + _scrollOffset.Y), Size);
+            var maxX = _sinkVisibleRegions.Max(r => r.BottomRight.X + _scrollOffset.X);
+            var maxY = _sinkVisibleRegions.Max(r => r.BottomRight.Y + _scrollOffset.Y);
 
-            var sourceRegions = visibleRegions.SelectMany(SplitRegion).Where(r => !r.IsEmpty).ToArray();
+            var fixedBothRegion = new Region(Point.Zero, new Point(_numFixedColumns, _numFixedRows));
+            var fixedColumnRegion = new Region(new Point(0, _numFixedRows + _scrollOffset.Y), new Point(_numFixedColumns, maxY));
+            var fixedRowRegion = new Region(new Point(_numFixedColumns + _scrollOffset.X, 0), new Point(maxX, _numFixedRows));
+            var dataRegion = new Region(new Point(_numFixedColumns + _scrollOffset.X, _numFixedRows + _scrollOffset.Y), new Point(maxX, maxY));
+
+            var sourceRegions = _sinkVisibleRegions.SelectMany(SplitRegion).Where(r => !r.IsEmpty).ToArray();
             _source.SetVisibleRegions(sourceRegions);
 
             Region[] SplitRegion(Region r)

@@ -27,5 +27,14 @@ namespace Slate.Core.Controls.DataGrid
             else return new DefaultPropertyColumn<TRow>(propertyName);
 
         }
+
+        public static IEnumerable<IColumn<TRow>> FromMethods<TRow>()
+        {
+            return typeof(TRow)
+                .GetMethods()
+                .Where(m => m.IsPublic && !m.GetParameters().Any() && m.ReturnType == typeof(void))
+                .Select(m => new MethodColumn<TRow>(m.Name, Color.Black))
+                .ToArray();
+        }
     }
 }

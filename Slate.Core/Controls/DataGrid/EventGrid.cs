@@ -40,7 +40,7 @@ namespace Slate.Core.Controls.DataGrid
             for(int i = 0; i < _columns.Length; i++)
             {
                 var column = _columns[i];
-                var subscription = column.Updates.Subscribe(r => HandleRowUpdate(i, r));
+                var subscription = column.Updates?.Subscribe(r => HandleRowUpdate(i, r)) ?? Disposable.Empty;
                 disposables.Add(subscription);
             }
 
@@ -75,22 +75,63 @@ namespace Slate.Core.Controls.DataGrid
             deactivatedCells.ExceptWith(newCells);
 
             var activatedCells = new HashSet<Point>(newCells);
-            deactivatedCells.ExceptWith(oldCells);
+            activatedCells.ExceptWith(oldCells);
 
             foreach(var cell in deactivatedCells)
             {
-                if (cell.X < 0 || cell.Y < 0 || cell.X >= Size.X || cell.Y >= Size.Y) continue;
+                Console.WriteLine($"Deactivate cell: {cell}");
 
-                var row = _content[cell.Y - Y_DATA];
-                var column = _columns[cell.X];
+                (var row, var column) = ToRowColumn(cell);
+                if(column == null) continue;
 
                 column.DeactivateRow(row);
+            }
+
+            foreach(var cell in activatedCells)
+            {
+                Console.WriteLine($"Activate cell: {cell}");
+
+                (var row, var column) = ToRowColumn(cell);
+                if(column == null) continue;
+
+                column.ActivateRow(row);
             }
         }
 
         public void Dispose()
         {
             _disposable.Dispose();
+        }
+
+        public override void MouseDown(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            (var row, var column) = ToRowColumn(cell);
+            if(column == null) return;
+
+            column.MouseDown(row, button, modifierKeys);
+        }
+
+        public override void MouseUp(Point cell, MouseButton button, ModifierKeys modifierKeys)
+        {
+            Console.WriteLine($"Mouse Up: {cell} {button} {modifierKeys}");
+
+            (var row, var column) = ToRowColumn(cell);
+            if(column == null) return;
+
+            column.MouseUp(row, button, modifierKeys);
+        }
+
+        private (TEvent, IColumn<TEvent>) ToRowColumn(Point point)
+        {
+            var dataPoint = point - new Point(0, Y_DATA);
+
+            if (dataPoint.X < 0 || dataPoint.Y < 0 || dataPoint.X >= _columns.Length || dataPoint.Y >= _content.Length) 
+                return (default(TEvent), null);
+
+            var row = _content[point.Y - Y_DATA];
+            var column = _columns[point.X];
+
+            return (row, column);
         }
 
         private void HandleRowUpdate(int columnIndex, TEvent row)

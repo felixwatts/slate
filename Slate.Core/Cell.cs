@@ -8,7 +8,7 @@ namespace Slate.Core
         public TextAlignment Alignment { get; }  
         public bool IsTextBold { get; }
 
-        public Cell(string text, uint color, TextAlignment alignment, bool isTextBold = false)
+        public Cell(string text, uint color, TextAlignment alignment = TextAlignment.Right, bool isTextBold = false)
         {
             Text = text;
             Color = color;

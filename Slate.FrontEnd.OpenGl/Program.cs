@@ -1,9 +1,11 @@
 ﻿using System;
 using System.ComponentModel;
+using System.Linq;
 using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
+using Slate.Core.Controls;
 using Slate.Core.Controls.DataGrid;
 
 namespace Slate.FrontEnd.OpenGl
@@ -11,6 +13,7 @@ namespace Slate.FrontEnd.OpenGl
     public class Row : INotifyPropertyChanged
     {
         private int _property4;
+        private IDisposable counter;
 
         public string Property1 { get; }
         public int Property2 { get; private set; }
@@ -41,6 +44,7 @@ namespace Slate.FrontEnd.OpenGl
 
         public void Method1()
         {
+            Console.WriteLine("Method1");
             Property2 = 0;
         }
     }
@@ -67,9 +71,9 @@ namespace Slate.FrontEnd.OpenGl
                 }
             });
 
-            //var testSource = Observable.Interval(TimeSpan.FromMilliseconds(1)).Select(t => new Row(t));
+            var columns = ColumnFactory.FromProperties<Row>().Union(ColumnFactory.FromMethods<Row>());
 
-            var testSlate = new EventGrid<Row>(testSource, ColumnFactory.FromProperties<Row>());
+            var testSlate = new ScrollBehaviour(new EventGrid<Row>(testSource, columns), 1, 0);
 
             using (var game = new FrontEnd(testSlate))
                 game.Run();

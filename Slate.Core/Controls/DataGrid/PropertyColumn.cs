@@ -7,12 +7,14 @@ using System.Reflection;
 namespace Slate.Core.Controls.DataGrid
 {
 
-    public abstract class PropertyColumn<TRow> : IColumn<TRow>
-    {
-        private bool isTRowINotifyPropertyChanged;
 
-        protected readonly PropertyInfo _property;
-        private readonly Subject<TRow> _updates;
+    public abstract class PropertyColumn<TRow> : ColumnBase<TRow>
+    {
+        private HashSet<TRow> _activeRows = new HashSet<TRow>();
+
+        private bool _isTRowINotifyPropertyChanged;
+
+        protected readonly PropertyInfo _property;        
         private readonly Cell _header;
         protected readonly uint _color;
         protected readonly TextAlignment _alignment;
@@ -24,33 +26,26 @@ namespace Slate.Core.Controls.DataGrid
             uint color, 
             TextAlignment alignment)
         {
-            _property = typeof(TRow).GetProperty(propertyName);
-            _updates = new Subject<TRow>();
+            _property = typeof(TRow).GetProperty(propertyName);            
             _header = new Cell($"{(header ?? _property.Name).ToUpper()} ▲▼", Color.Black, TextAlignment.Center, true);
             _color = color;
             _alignment = alignment;
             IsFixed = isFixed;
-            isTRowINotifyPropertyChanged = typeof(INotifyPropertyChanged).IsAssignableFrom(typeof(TRow));
+            _isTRowINotifyPropertyChanged = typeof(INotifyPropertyChanged).IsAssignableFrom(typeof(TRow));
         }
 
-        public bool IsFixed { get; }
+        public override bool IsFixed { get; }
 
-        public abstract bool CanSort { get; }
-
-        public IObservable<TRow> Updates => _updates;
-
-        public abstract int Compare(TRow r1, TRow r2);
-
-        public Cell GetCell(TRow row)
+        public override Cell GetCell(TRow row)
         {
             var val = _property.GetValue(row);
             var text = ValueToString(val);
-            return new Cell(text, _color, _alignment);
+            return new Cell(text, _activeRows.Contains(row) ? _color : Color.Black, _alignment);
         }
 
-        public Cell GetHeader() => _header;
+        public override Cell GetHeader() => _header;
 
-        public void UserInput(IEnumerable<TRow> rows, string input)
+        public override void UserInput(IEnumerable<TRow> rows, string input)
         {
             if(!_property.CanWrite) return;
 
@@ -70,25 +65,23 @@ namespace Slate.Core.Controls.DataGrid
             return (T)_property.GetValue(row);
         }
 
-        public void ActivateRow(TRow row)
+        public override void ActivateRow(TRow row)
         {
-            _numActiveCells++;
-            Console.WriteLine(_numActiveCells);
+            if(_activeRows.Contains(row)) throw new Exception();
+            _activeRows.Add(row);
 
-            if(isTRowINotifyPropertyChanged)
+            if(_isTRowINotifyPropertyChanged)
                 (row as INotifyPropertyChanged).PropertyChanged += HandleRowPropertyChanged;
         }
 
-        public void DeactivateRow(TRow row)
-        {
-            _numActiveCells--;
-            Console.WriteLine(_numActiveCells);
+        public override void DeactivateRow(TRow row)
+        {   
+            if(!_activeRows.Contains(row)) throw new Exception();
+            _activeRows.Remove(row);
 
-            if(isTRowINotifyPropertyChanged)
+            if(_isTRowINotifyPropertyChanged)
                 (row as INotifyPropertyChanged).PropertyChanged -= HandleRowPropertyChanged;
         }
-
-        private static int _numActiveCells;
 
         private void HandleRowPropertyChanged(object sender, PropertyChangedEventArgs e)
         {

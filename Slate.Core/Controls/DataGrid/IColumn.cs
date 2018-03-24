@@ -18,6 +18,9 @@ namespace Slate.Core.Controls.DataGrid
         void ActivateRow(TRow row);
         void DeactivateRow(TRow row);
 
+        void MouseDown(TRow row, MouseButton button, ModifierKeys modifierKeys);
+        void MouseUp(TRow row, MouseButton button, ModifierKeys modifierKeys);
+
         IObservable<TRow> Updates { get; }
     }
 }
