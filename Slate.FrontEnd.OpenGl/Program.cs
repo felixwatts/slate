@@ -5,7 +5,7 @@ using System.Reactive.Linq;
 using System.Reactive.Subjects;
 using System.Threading;
 using System.Threading.Tasks;
-using Slate.Core.Controls;
+using Slate.Core.Behaviours;
 using Slate.Core.Controls.DataGrid;
 
 namespace Slate.FrontEnd.OpenGl
