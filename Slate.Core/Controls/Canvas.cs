@@ -19,9 +19,8 @@ namespace Slate.Core.Controls
 
         public void AddControl(ISlate control, Point at)
         {            
-            var panel = new Panel(control, at);
+            var panel = new Panel(control, at, _updates);
             _panels.Add(panel);
-            panel.Updates.Subscribe(_updates.OnNext);
 
             _updates.OnNext(Update.SizeChanged);            
         }
