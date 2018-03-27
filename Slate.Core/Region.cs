@@ -51,6 +51,11 @@ namespace Slate.Core
                     Math.Min(BottomRight.Y, other.BottomRight.Y)));
         }
 
+        public Region Translate(Point offset)
+        {
+            return new Region(TopLeft + offset, BottomRight + offset);
+        }
+
         public IEnumerator<Point> GetEnumerator()
         {
             for(int x = TopLeft.X; x < BottomRight.X; x++)

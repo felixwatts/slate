@@ -138,7 +138,7 @@ namespace Slate.Core.Controls.DataGrid
         {
             var rowIndex = _content.IndexOf(row)+1;
             var dirtyRegion = Region.FromCell(new Point(columnIndex, rowIndex));
-            updates.OnNext(Update.RegionDirty(dirtyRegion));
+            _updates.OnNext(Update.RegionDirty(dirtyRegion));
         }
 
         private void HandleNewEvent(TEvent item)
@@ -167,11 +167,11 @@ namespace Slate.Core.Controls.DataGrid
                 }
             }
 
-            updates.OnNext(Update.BeginBulkUpdate);
-            updates.OnNext(Update.SizeChanged);
-            updates.OnNext(Update.ScrollableSizeChanged);
-            updates.OnNext(Update.RegionDirty(Region.FromBottomRight(Size)));
-            updates.OnNext(Update.EndBulkUpdate);
+            _updates.OnNext(Update.BeginBulkUpdate);
+            _updates.OnNext(Update.SizeChanged);
+            _updates.OnNext(Update.ScrollableSizeChanged);
+            _updates.OnNext(Update.RegionDirty(Region.FromBottomRight(Size)));
+            _updates.OnNext(Update.EndBulkUpdate);
         }
 
         private class EventCollection

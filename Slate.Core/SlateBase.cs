@@ -6,28 +6,28 @@ namespace Slate.Core
 {
     public abstract class SlateBase : ISlate
     {
-        protected Subject<Update> updates;
-        private readonly object modifyLock;
+        protected Subject<Update> _updates;
+        private readonly object _modifyLock;
 
         public virtual Point Size { get; protected set; }
 
         public virtual Point ScrollableSize => Size;
 
-        public IObservable<Update> Updates => updates;
+        public IObservable<Update> Updates => _updates;
 
         protected SlateBase()
         {
-            modifyLock = new object();
+            _modifyLock = new object();
             Size = Point.Zero;
-            updates = new Subject<Update>();
+            _updates = new Subject<Update>();
         }
 
         public abstract Cell GetCell(Point at);
 
         public IDisposable Lock()
         {
-            System.Threading.Monitor.Enter(modifyLock);
-            return Disposable.Create(() => System.Threading.Monitor.Exit(modifyLock));
+            System.Threading.Monitor.Enter(_modifyLock);
+            return Disposable.Create(() => System.Threading.Monitor.Exit(_modifyLock));
         }
 
         public virtual void SetScrollOffset(Point offset)

@@ -1,7 +1,7 @@
 using System;
 using System.Linq;
 
-namespace Slate.Core.Controls
+namespace Slate.Core.Behaviours
 {
     public class ScrollBehaviour : SlateMutation
     {        
